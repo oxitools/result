@@ -517,3 +517,27 @@ export class Result<T, E> {
     );
   }
 }
+
+/**
+ * A convenience reference to the `Result.Ok` method, allowing for the creation of `Ok` result instances without directly invoking the `Result` class.
+ * This function facilitates the creation of `Ok` results, encapsulating success values in a more succinct and readable manner.
+ * @type {typeof Result.Ok}
+ * @example
+ * ```ts
+ * const success = Ok(123);
+ * console.log(success.toString()); // "Ok(123)"
+ * ```
+ */
+export const Ok: typeof Result.Ok = Result.Ok;
+
+/**
+ * A convenience reference to the `Result.Err` method, allowing for the creation of `Err` result instances without directly invoking the `Result` class.
+ * This function facilitates the creation of `Err` results, encapsulating error values in a more succinct and readable manner.
+ * @type {typeof Result.Err}
+ * @example
+ * ```ts
+ * const error = Err("Something went wrong");
+ * console.log(error.toString()); // "Err(Something went wrong)"
+ * ```
+ */
+export const Err: typeof Result.Err = Result.Err;
