@@ -1,0 +1,6 @@
+{
+  "name": "@oxi/result",
+  "version": "0.1.0",
+  "exports": "./mod.ts",
+  "imports": { "@oxi/core": "jsr:@oxi/core@^0.2.1" }
+}
