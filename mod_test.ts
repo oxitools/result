@@ -35,6 +35,14 @@ function err(error = "error"): Result<number, string> {
   return Result.Err(error);
 }
 
+Deno.test('Result#isResult', () => {
+  assert(Result.isResult(ok(42)));
+  assert(Result.isResult(err("error")));
+  assertFalse(Result.isResult(42));
+  assertFalse(Result.isResult("error"));
+  assertFalse(Result.isResult(null));
+})
+
 Deno.test("Result#Ok", () => {
   const result = ok(42);
   assertOk(result, 42);

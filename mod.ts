@@ -93,6 +93,21 @@ export class Result<T, E> {
   }
 
   /**
+   * Checks if a value is a Result instance. 
+   * @param value The value to check. 
+   * @returns {value is Result<unknown, unknown>} True if the value is a Result instance, false otherwise. 
+   * ```ts
+   * const result = Result.Ok(42);
+   * console.log(Result.isResult(result)); // true
+   * console.log(Result.isResult(42)); // false
+   * ```
+   * @since 0.2.0
+   */
+  static isResult(value: unknown): value is Result<unknown, unknown> {
+    return value instanceof Result;
+  }
+
+  /**
    * Creates an Ok result containing a success value.
    * @param value The success value.
    * @returns {Result<T, E>} An Ok result instance.
