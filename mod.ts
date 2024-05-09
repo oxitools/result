@@ -76,8 +76,7 @@ type GenericFunction = (...args: any[]) => any;
 
 type AsyncToResult<T extends GenericFunction> = ReturnType<T> extends Promise<
   infer U
->
-  ? Promise<Result<U, unknown>>
+> ? Promise<Result<U, unknown>>
   : Result<ReturnType<T>, unknown>;
 
 /**
@@ -93,9 +92,9 @@ export class Result<T, E> {
   }
 
   /**
-   * Checks if a value is a Result instance. 
-   * @param value The value to check. 
-   * @returns {value is Result<unknown, unknown>} True if the value is a Result instance, false otherwise. 
+   * Checks if a value is a Result instance.
+   * @param value The value to check.
+   * @returns {value is Result<unknown, unknown>} True if the value is a Result instance, false otherwise.
    * ```ts
    * const result = Result.Ok(42);
    * console.log(Result.isResult(result)); // true
@@ -110,23 +109,23 @@ export class Result<T, E> {
   /**
    * Creates an Ok result containing a success value.
    * @param value The success value.
-   * @returns {Result<T, E>} An Ok result instance.
+   * @returns {Result<T, never>} An Ok result instance.
    * @example
    * const success = Result.Ok(42);
    */
-  static Ok<T, E>(value: T): Result<T, E> {
-    return new Result<T, E>(true, value);
+  static Ok<T>(value: T): Result<T, never> {
+    return new Result<T, never>(true, value);
   }
 
   /**
    * Creates an Err result containing an error value.
    * @param value The error value.
-   * @returns {Result<T, E>} An Err result instance.
+   * @returns {Result<never, E>} An Err result instance.
    * @example
    * const error = Result.Err(new Error("Something went wrong"));
    */
-  static Err<T, E>(value: E): Result<T, E> {
-    return new Result<T, E>(false, value);
+  static Err<E>(value: E): Result<never, E> {
+    return new Result<never, E>(false, value);
   }
 
   /**
@@ -167,11 +166,13 @@ export class Result<T, E> {
     try {
       const value = fn();
       if (isPromise(value)) {
-        return value.then(Result.Ok).catch(Result.Err) as AsyncToResult<T>;
+        return value.then(Result.Ok).catch(
+          Result.Err,
+        ) as unknown as AsyncToResult<T>;
       }
-      return Result.Ok(value) as AsyncToResult<T>;
+      return Result.Ok(value) as unknown as AsyncToResult<T>;
     } catch (error) {
-      return Result.Err(error) as AsyncToResult<T>;
+      return Result.Err(error) as unknown as AsyncToResult<T>;
     }
   }
 
@@ -184,7 +185,7 @@ export class Result<T, E> {
    * const result = safeFunction(1); // Result.Ok(2)
    */
   static wrap<T extends GenericFunction>(
-    fn: T
+    fn: T,
   ): (...args: Parameters<T>) => AsyncToResult<T> {
     return function (...args: Parameters<T>): AsyncToResult<T> {
       return Result.from(() => fn(...args)) as AsyncToResult<T>;
@@ -268,7 +269,7 @@ export class Result<T, E> {
   map<U>(mapper: (value: T) => U): Result<U, E> {
     return this.match(
       (value) => Result.Ok(mapper(value)),
-      (value) => Result.Err(value)
+      (error) => Result.Err(error) as Result<U, E>,
     );
   }
 
@@ -303,16 +304,16 @@ export class Result<T, E> {
   /**
    * Transforms the Err value of the Result using a given function, leaving an Ok unchanged.
    * @param mapper A function that transforms an Err value.
-   * @returns {Result<T, U>} A Result with the Err value transformed, or the original Ok.
+   * @returns {Result<T, F>} A Result with the Err value transformed, or the original Ok.
    * @example
    * const result = Result.Err("old error");
    * const updatedError = result.mapErr(error => `new ${error}`);
    * console.log(updatedError.unwrapErr()); // "new old error"
    */
-  mapErr<U>(mapper: (value: E) => U): Result<T, U> {
+  mapErr<F>(mapper: (value: E) => F): Result<T, F> {
     return this.match(
       (value) => Result.Ok(value),
-      (value) => Result.Err(mapper(value))
+      (value) => Result.Err(mapper(value)) as Result<T, F>,
     );
   }
 
@@ -440,7 +441,7 @@ export class Result<T, E> {
   and<U>(result: Result<U, E>): Result<U, E> {
     return this.match(
       () => result,
-      (value) => Result.Err(value)
+      (value) => Result.Err(value),
     );
   }
 
@@ -473,7 +474,7 @@ export class Result<T, E> {
   or<F>(result: Result<T, F>): Result<T, F> {
     return this.match(
       (value) => Result.Ok(value),
-      () => result
+      () => result,
     );
   }
 
@@ -508,7 +509,7 @@ export class Result<T, E> {
   toJSON(): { ok: true; value: T } | { ok: false; error: E } {
     return this.match<{ ok: true; value: T } | { ok: false; error: E }>(
       (value) => ({ ok: true, value }),
-      (error) => ({ ok: false, error })
+      (error) => ({ ok: false, error }),
     );
   }
 
@@ -528,7 +529,7 @@ export class Result<T, E> {
   toString(): string {
     return this.match(
       (value) => `Ok(${JSON.stringify(value)})`,
-      (error) => `Err(${JSON.stringify(error)})`
+      (error) => `Err(${JSON.stringify(error)})`,
     );
   }
 }

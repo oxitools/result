@@ -9,7 +9,7 @@ import { Result } from "./mod.ts";
 
 function assertOk<T, E>(
   result: Result<T, E>,
-  value?: T
+  value?: T,
 ): asserts result is Result<T, E> {
   assert(result.isOk(), `Expected Ok, got Err`);
   if (isDefined(value)) {
@@ -19,7 +19,7 @@ function assertOk<T, E>(
 
 function assertErr<T, E>(
   result: Result<T, E>,
-  value?: E
+  value?: E,
 ): asserts result is Result<T, E> {
   assert(result.isErr(), `Expected Err, got Ok`);
   if (isDefined(value)) {
@@ -35,13 +35,13 @@ function err(error = "error"): Result<number, string> {
   return Result.Err(error);
 }
 
-Deno.test('Result#isResult', () => {
+Deno.test("Result#isResult", () => {
   assert(Result.isResult(ok(42)));
   assert(Result.isResult(err("error")));
   assertFalse(Result.isResult(42));
   assertFalse(Result.isResult("error"));
   assertFalse(Result.isResult(null));
-})
+});
 
 Deno.test("Result#Ok", () => {
   const result = ok(42);
@@ -77,7 +77,7 @@ Deno.test("Result#wrap", async () => {
   let result2 = await wrapped2("world");
   assertOk(result2, "Hello, world!");
   wrapped2 = Result.wrap((_: string) => Promise.reject("error"));
-  result2 = await wrapped("world");
+  result2 = await wrapped2("world");
   assertErr(result2);
 });
 
@@ -85,12 +85,12 @@ Deno.test("Result.match", () => {
   let value = 0;
   ok().match(
     () => (value = 1),
-    () => (value = -1)
+    () => (value = -1),
   );
   assertEquals(value, 1);
   err().match(
     () => (value = 1),
-    () => (value = -1)
+    () => (value = -1),
   );
   assertEquals(value, -1);
 });
@@ -140,12 +140,12 @@ Deno.test("Result.mapOr", () => {
 Deno.test("Result.mapOrElse", () => {
   let result = ok(42).mapOrElse(
     () => 0,
-    (value) => value * 2
+    (value) => value * 2,
   );
   assertEquals(result, 84);
   result = err("error").mapOrElse(
     () => 0,
-    (value) => value * 2
+    (value) => value * 2,
   );
   assertEquals(result, 0);
 });
@@ -178,7 +178,7 @@ Deno.test("Result.unwrap", () => {
   assertThrows(
     () => err().unwrap(),
     Error,
-    "called `Result.unwrap()` on an `Err` value"
+    "called `Result.unwrap()` on an `Err` value",
   );
 });
 
@@ -190,11 +190,11 @@ Deno.test("Result.unwrapOr", () => {
 Deno.test("Result.unwrapOrElse", () => {
   assertEquals(
     ok(42).unwrapOrElse(() => 0),
-    42
+    42,
   );
   assertEquals(
     err("error").unwrapOrElse(() => 0),
-    0
+    0,
   );
 });
 
@@ -208,7 +208,7 @@ Deno.test("Result.unwrapErr", () => {
   assertThrows(
     () => ok(42).unwrapErr(),
     Error,
-    "called `Result.unwrapErr()` on an `Ok` value"
+    "called `Result.unwrapErr()` on an `Ok` value",
   );
 });
 
@@ -260,7 +260,7 @@ Deno.test("Result.toJSON", () => {
   assertEquals(JSON.stringify(ok(42)), JSON.stringify({ ok: true, value: 42 }));
   assertEquals(
     JSON.stringify(err("error")),
-    JSON.stringify({ ok: false, error: "error" })
+    JSON.stringify({ ok: false, error: "error" }),
   );
 });
 
